@@ -24,7 +24,7 @@ class StoreContactSubmissionRequest extends FormRequest
                 Rule::in(data_get(SiteContent::current(), 'contact.form.service_options', [])),
             ],
             'message' => ['required', 'string', 'min:10', 'max:5000'],
-            'website' => ['prohibited'],
+            'website' => ['nullable', 'size:0'],
         ];
     }
 

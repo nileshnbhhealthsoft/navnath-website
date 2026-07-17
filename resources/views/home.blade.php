@@ -70,7 +70,7 @@
             <div class="hero-visual reveal reveal-delay-1">
                 <div class="hero-frame">
                     @if ($media('media.hero_image'))
-                        <img src="{{ $media('media.hero_image') }}" alt="" class="cover-image">
+                        <img src="{{ $media('media.hero_image') }}" alt="" class="uploaded-fit-image">
                     @else
                         <div class="ascent-visual" aria-hidden="true">
                             <span class="visual-grid"></span>
@@ -123,7 +123,7 @@
             <div class="about-visual reveal">
                 <div class="about-image-wrap">
                     @if ($media('media.about_image'))
-                        <img src="{{ $media('media.about_image') }}" alt="" class="cover-image">
+                        <img src="{{ $media('media.about_image') }}" alt="" class="uploaded-fit-image">
                     @else
                         <div class="about-art" aria-hidden="true">
                             <div class="about-art-panel panel-one"><span>01</span><strong>Think clearly</strong></div>
@@ -174,7 +174,7 @@
                     <article class="service-card reveal" style="--delay: {{ ($index % 3) * 90 }}ms">
                         <div class="service-media">
                             @if ($media('media.service_images.'.$index))
-                                <img src="{{ $media('media.service_images.'.$index) }}" alt="" class="cover-image">
+                                <img src="{{ $media('media.service_images.'.$index) }}" alt="" class="uploaded-fit-image">
                             @else
                                 <div class="service-pattern pattern-{{ ($index % 3) + 1 }}" aria-hidden="true">
                                     <span></span><span></span><span></span>
@@ -254,7 +254,7 @@
                     <article class="work-card reveal">
                         <div class="work-image">
                             @if ($media('media.work_images.'.$index))
-                                <img src="{{ $media('media.work_images.'.$index) }}" alt="" class="cover-image">
+                                <img src="{{ $media('media.work_images.'.$index) }}" alt="" class="uploaded-fit-image">
                             @else
                                 <div class="case-visual case-{{ $index + 1 }}" aria-hidden="true">
                                     <span class="case-line"></span>
@@ -280,8 +280,9 @@
     <section class="insight-band">
         <div class="container insight-grid">
             <div class="insight-symbol reveal" aria-hidden="true">
-                @if ($media('media.brand_mark'))
-                    <img src="{{ $media('media.brand_mark') }}" alt="">
+                @php($insightImage = $media('media.insight_image') ?: $media('media.brand_mark'))
+                @if ($insightImage)
+                    <img src="{{ $insightImage }}" alt="">
                 @else
                     <span>A</span>
                 @endif
@@ -348,7 +349,7 @@
 
                 <div class="contact-art" aria-hidden="true">
                     @if ($media('media.contact_image'))
-                        <img src="{{ $media('media.contact_image') }}" alt="" class="cover-image">
+                        <img src="{{ $media('media.contact_image') }}" alt="" class="uploaded-fit-image">
                     @else
                         <span class="contact-ring ring-one"></span>
                         <span class="contact-ring ring-two"></span>

@@ -12,6 +12,9 @@ return [
             ['field' => 'hero_image', 'path' => 'media.hero_image', 'label' => 'Hero Image', 'help' => 'Optional. Recommended 1200 × 1200 px.'],
             ['field' => 'about_image', 'path' => 'media.about_image', 'label' => 'About Image', 'help' => 'Optional. Recommended 1000 × 1200 px.'],
         ],
+        'Insight' => [
+            ['field' => 'insight_image', 'path' => 'media.insight_image', 'label' => 'Insight Section Image', 'help' => 'Shown beside the Our Perspective text. Transparent PNG/SVG recommended.'],
+        ],
         'Service Images' => [
             ['field' => 'service_image_1', 'path' => 'media.service_images.0', 'label' => 'Digital Strategy Image'],
             ['field' => 'service_image_2', 'path' => 'media.service_images.1', 'label' => 'Product Engineering Image'],

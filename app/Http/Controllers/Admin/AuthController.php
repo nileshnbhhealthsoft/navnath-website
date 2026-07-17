@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\AdminUser;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -25,15 +27,20 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $validEmail = hash_equals((string) config('admin.email'), (string) $credentials['email']);
-        $validPassword = hash_equals((string) config('admin.password'), (string) $credentials['password']);
+        $admin = AdminUser::query()
+            ->where('email', $credentials['email'])
+            ->where('is_active', true)
+            ->first();
 
-        if (! $validEmail || ! $validPassword) {
+        if (! $admin || ! Hash::check((string) $credentials['password'], $admin->password)) {
             return back()->withErrors(['email' => 'Invalid admin credentials.'])->onlyInput('email');
         }
 
+        $admin->forceFill(['last_login_at' => now()])->save();
+
         $request->session()->regenerate();
         $request->session()->put('admin_authenticated', true);
+        $request->session()->put('admin_user_id', $admin->id);
 
         return redirect()->intended(route('admin.dashboard'));
     }

@@ -23,7 +23,8 @@ class SiteContentController extends Controller
         ]);
 
         $content = $validated['content'];
-        $content['media'] = data_get(SiteContent::current(), 'media', []);
+        $storedContent = SiteContent::query()->latest('id')->first()?->content;
+        $content['media'] = data_get($storedContent, 'media', data_get(SiteContent::current(), 'media', []));
 
         SiteContent::saveContent($content);
 

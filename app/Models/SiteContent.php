@@ -19,7 +19,7 @@ class SiteContent extends Model
         $defaults = config('site_content', []);
 
         try {
-            $stored = static::query()->value('content');
+            $stored = static::query()->latest('id')->first()?->content;
         } catch (Throwable) {
             return $defaults;
         }
@@ -33,7 +33,7 @@ class SiteContent extends Model
 
     public static function saveContent(array $content): self
     {
-        $record = static::query()->first() ?? new static();
+        $record = static::query()->latest('id')->first() ?? new static();
         $record->content = self::mergeRecursive(config('site_content', []), $content);
         $record->save();
 

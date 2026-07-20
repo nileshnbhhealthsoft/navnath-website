@@ -206,6 +206,9 @@
                 @foreach (data_get($content, 'industries.items', []) as $index => $industry)
                     <article class="industry-row reveal">
                         <span class="industry-index">0{{ $index + 1 }}</span>
+                        @if ($media('media.industry_images.'.$index))
+                            <span class="industry-thumb"><img src="{{ $media('media.industry_images.'.$index) }}" alt=""></span>
+                        @endif
                         <div class="industry-text">
                             <h3>{{ data_get($industry, 'title') }}</h3>
                             <p>{{ data_get($industry, 'text') }}</p>

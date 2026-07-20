@@ -11,6 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class SiteMediaController extends Controller
 {
@@ -58,6 +59,7 @@ class SiteMediaController extends Controller
             }
 
             if ($file instanceof UploadedFile) {
+                $this->assertValidUpload($file, $field);
                 $this->assertSafeSvg($file);
                 $newPath = $this->storeUploadedFile($file);
                 $this->deleteManagedFile($oldPath);
@@ -89,20 +91,61 @@ class SiteMediaController extends Controller
     private function storeUploadedFile(UploadedFile $file): string
     {
         $directory = public_path('uploads/site-media');
-        File::ensureDirectoryExists($directory);
 
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
         $filename = now()->format('YmdHis').'-'.Str::uuid().'.'.$extension;
-        $file->move($directory, $filename);
+
+        try {
+            File::ensureDirectoryExists($directory);
+
+            if (! File::isWritable($directory)) {
+                throw ValidationException::withMessages([
+                    'media_files' => 'The upload folder is not writable: public/uploads/site-media.',
+                ]);
+            }
+
+            $file->move($directory, $filename);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw ValidationException::withMessages([
+                'media_files' => 'The image could not be uploaded. Please check server folder permissions for public/uploads/site-media.',
+            ]);
+        }
 
         return 'uploads/site-media/'.$filename;
+    }
+
+    private function assertValidUpload(UploadedFile $file, string $field): void
+    {
+        if ($file->isValid()) {
+            return;
+        }
+
+        $messages = [
+            UPLOAD_ERR_INI_SIZE => 'The image is larger than the server upload limit.',
+            UPLOAD_ERR_FORM_SIZE => 'The image is larger than the form upload limit.',
+            UPLOAD_ERR_PARTIAL => 'The image was only partially uploaded. Please try again.',
+            UPLOAD_ERR_NO_FILE => 'No image was selected for upload.',
+            UPLOAD_ERR_NO_TMP_DIR => 'The server temporary upload folder is missing.',
+            UPLOAD_ERR_CANT_WRITE => 'The server could not write the uploaded image to disk.',
+            UPLOAD_ERR_EXTENSION => 'A PHP extension blocked the image upload.',
+        ];
+
+        throw ValidationException::withMessages([
+            'media_files.'.$field => $messages[$file->getError()] ?? 'The image upload failed.',
+        ]);
     }
 
     private function deleteManagedFile(string $path): void
     {
         $normalized = ltrim(str_replace('\\', '/', $path), '/');
 
-        if ($normalized === '' || ! str_starts_with($normalized, 'uploads/site-media/')) {
+        if (
+            $normalized === ''
+            || ! str_starts_with($normalized, 'uploads/site-media/')
+            || $this->isPackagedDefaultMedia($normalized)
+        ) {
             return;
         }
 
@@ -110,6 +153,14 @@ class SiteMediaController extends Controller
         if (File::isFile($fullPath)) {
             File::delete($fullPath);
         }
+    }
+
+    private function isPackagedDefaultMedia(string $path): bool
+    {
+        $defaults = config('site_content.media', []);
+        $paths = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($defaults)));
+
+        return in_array($path, array_filter($paths, 'is_string'), true);
     }
 
     private function assertSafeSvg(UploadedFile $file): void

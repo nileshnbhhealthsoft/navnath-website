@@ -43,6 +43,10 @@ class SiteContent extends Model
     private static function mergeRecursive(array $defaults, array $stored): array
     {
         foreach ($stored as $key => $value) {
+            if ($value === '' && isset($defaults[$key]) && $defaults[$key] !== '') {
+                continue;
+            }
+
             if (array_key_exists($key, $defaults) && is_array($defaults[$key])) {
                 // Keep collection/object sections as arrays even when older or malformed
                 // database content contains null or a scalar value for the same key.

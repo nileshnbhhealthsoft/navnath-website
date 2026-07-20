@@ -33,4 +33,16 @@ class HomePageTest extends TestCase
             ->assertSee('Capabilities that connect strategy to execution.')
             ->assertSee('Government &amp; Public Services', false);
     }
+
+    public function test_blank_stored_media_uses_packaged_default_image(): void
+    {
+        $content = config('site_content');
+        data_set($content, 'media.hero_image', '');
+
+        SiteContent::query()->create(['content' => $content]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('uploads/site-media/hero-business-analytics.jpg', false);
+    }
 }
